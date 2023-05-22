@@ -2,14 +2,18 @@ import pandas as pd
 from pandasai import PandasAI
 from pandasai.llm.azure_openai import AzureOpenAI
 from flask import Flask, request, jsonify
-from dotenv import load_dotenv
+# from dotenv import load_dotenv
 import re
 import openai
-load_dotenv()
+import os
+# load_dotenv()
 
 app = Flask(__name__)
 openai.api_type = "azure"
 openai.api_version = "2023-03-15-preview" 
+os.environ["AZURE_OPENAI_KEY"]="be51f10009fa41258fcd750a2fba07f2"
+os.environ["AZURE_OPENAI_ENDPOINT"]="https://openai-ss.openai.azure.com/"
+
 
 df = pd.read_csv('six_month_yahoo_finance.csv')
 
@@ -18,12 +22,14 @@ pandas_ai = PandasAI(llm, verbose=True)
 
 identity_patterns = [
     "who\s*(are|r)\s*you\??",
-    "who\s*(did|has)?\s*designed\s*you\??",
+    "who\s*(did|has)?\s*(designed|designd|desgined)\s*you\??",
+    "who\s*(dev|devloped|developed)\s*(you|u)\??",
     "what('s|s| is)?\s*your\s*(name|duty)\??",
     "what\s*do\s*you\s*do\??",
     "tell\s*me\s*about\s*your\s*self\??",
     "describe\s*your\s*self\??",
 ]
+
 
 @app.route("/query", methods=["POST"])
 def query():
@@ -46,7 +52,7 @@ def query():
         return jsonify({"error": str(ve)}), 400
     except Exception as e:
         app.logger.exception(e)
-        return jsonify({"error": "SheetGPT is busy in serving other requests at thi moment, please after sometime, bye."}), 500
+        return jsonify({"error": "SheetGPT is busy in serving other requests at this moment, please try after sometime."}), 500
 
 @app.route("/data", methods=["GET"])
 def data():
