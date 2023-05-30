@@ -1,3 +1,5 @@
 pandasai
 pandas
 flask
+langchain
+openai

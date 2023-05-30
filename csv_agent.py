@@ -1,21 +1,19 @@
 import pandas as pd
-from pandasai import PandasAI
-from pandasai.llm.azure_openai import AzureOpenAI
+from langchain.agents import create_csv_agent
+from langchain.chat_models import ChatOpenAI
 from flask import Flask, request, jsonify
 # from dotenv import load_dotenv
 import re
-import openai
 import os
 # load_dotenv()
 
-app = Flask(__name__)
-
-
+app = Flask(__name__)ßß
 
 df = pd.read_csv('six_month_yahoo_finance.csv')
 
-llm = AzureOpenAI(api_version="2023-03-15-preview", deployment_name="ss-gpt")
-pandas_ai = PandasAI(llm, verbose=True)
+csv = 'six_month_yahoo_finance.csv'
+
+agent = create_csv_agent(ChatOpenAI(temperature=0,engine="ss-gpt-32k"), csv)
 
 identity_patterns = [
     "who\s*(are|r)\s*you\??",
@@ -40,7 +38,7 @@ def query():
             response = "Greetings! I'm SheetGPT, a product of State Street Bionics team. My architecture is empowered by OpenAI's advanced Generative AI technology. My primary responsibility involves analyzing tabular data and providing valuable insights for users. Rest assured, your data-driven queries are in capable hands."
         else:
             # Generate a response from the LLM
-            response = pandas_ai.run(df, prompt=message)
+            response = agent.run(message)
         
         # Return the LLM's response
         return jsonify({"response": response})
